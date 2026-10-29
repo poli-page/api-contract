@@ -5287,14 +5287,14 @@
             "auth": "bearer",
             "idempotencyKey": "absent",
             "method": "GET",
-            "minGapMsBefore": 160,
+            "minGapMsBefore": 85,
             "path": "/v1/documents/doc_abc123"
           },
           {
             "auth": "bearer",
             "idempotencyKey": "absent",
             "method": "GET",
-            "minGapMsBefore": 170,
+            "minGapMsBefore": 95,
             "path": "/v1/documents/doc_abc123"
           }
         ],

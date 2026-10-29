@@ -34,6 +34,11 @@ updates:
       directory: /
       schedule:
           interval: daily
+      # Dependabot waits 3 days after a release by default; exempt the contract.
+      cooldown:
+          default-days: 3
+          exclude:
+              - 'poli-page/api-contract'
 ```
 
 ## `contract.json`
@@ -77,7 +82,9 @@ Each case has a unique `id`, a `title` and a `kind`.
   (absent means a fixed test key) pointed at a local server; the server answers `responses` in
   order (a `status` with `headers` and one of `json`, `text` or `base64`, or a `fault`: `drop` or
   `hang`) and records the requests. Call `call.method` with `call.args`, then compare `expect.requests` (method,
-  path, auth, idempotency key, body; timing as lower bounds), `expect.events` (`request` and
+  path, auth, idempotency key, body; timing as lower bounds measured on the server, in integer milliseconds; after a hung
+  attempt the bound counts only half of `timeoutMs`, since the client's timer starts before its
+  request reaches the server), `expect.events` (`request` and
   `retry` hooks) and `expect.result` (the value, or the normalized error with its predicates).
   A case with `requires: "cancellation"` runs only in the SDKs of `policy.cancellationSdks`.
   A case with `stopAfterRetryEvents: N` is stopped at its Nth `retry` event (cancel or abandon the
