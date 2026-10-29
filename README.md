@@ -80,9 +80,25 @@ Each case has a unique `id`, a `title` and a `kind`.
   path, auth, idempotency key, body; timing as lower bounds), `expect.events` (`request` and
   `retry` hooks) and `expect.result` (the value, or the normalized error with its predicates).
   A case with `requires: "cancellation"` runs only in the SDKs of `policy.cancellationSdks`.
+  A case with `stopAfterRetryEvents: N` is stopped at its Nth `retry` event (cancel or abandon the
+  call): compare the events and requests up to that point, not the result.
 - `impl`: for integration libraries. Send `request` to the example app, its SDK pointed at the
   local server answering `responses`, and compare the app's answer with `expect` (`status`,
   `location`, `json`, `contentType`, and the SDK's `requests` when present).
+
+### Placeholders
+
+Strings in a case may contain placeholders, replaced before the case runs:
+
+- `{{mock}}`: the local server's origin, e.g. `http://127.0.0.1:41234`.
+- `{{httpDate+N}}`: an HTTP-date (`Wed, 21 Oct 2026 07:28:00 GMT`) N seconds after the
+  replacement.
+
+Any other placeholder is an error. A case without `apiKey` uses any non-empty test key; requests
+with `auth: "bearer"` carry `Authorization: Bearer <that key>`.
+
+`policy.sdkErrors` messages use `{timeoutMs}` and `{status}`; an entry with `networkMessage` uses
+it instead when the failure has no HTTP status.
 
 ## License
 

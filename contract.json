@@ -7529,6 +7529,7 @@
     "sdkErrors": {
       "DOWNLOAD_FAILED": {
         "message": "Failed to download PDF: HTTP {status}",
+        "networkMessage": "Failed to download PDF: network error",
         "status": "storage"
       },
       "PROJECT_REQUIRED_FOR_DOCUMENT": {
