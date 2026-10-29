@@ -1,0 +1,14 @@
+name: Poli Page API contract
+description: Copies contract.json to $RUNNER_TEMP and outputs its path.
+outputs:
+    path:
+        description: Absolute path of the copied contract.json.
+        value: ${{ steps.copy.outputs.path }}
+runs:
+    using: composite
+    steps:
+        - id: copy
+          shell: bash
+          run: |
+              cp "$GITHUB_ACTION_PATH/contract.json" "$RUNNER_TEMP/poli-page-contract.json"
+              echo "path=$RUNNER_TEMP/poli-page-contract.json" >> "$GITHUB_OUTPUT"
