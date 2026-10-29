@@ -64,10 +64,11 @@ path or method no route has), `status` and `code`. The error body is
 ### `policy`
 
 The rules an SDK follows: `sdkMethods` (SDK method to route), `sdkErrors` (SDK-side codes and
-their messages), `retryRules`, `nonRetryableCodes`, `retryAfterClampMs`, `normalizations` (what
-an SDK test may normalize before comparing), `errorCaseMethod` (the SDK method a generated error
-case calls, per route), `cancellationSdks`, and for integration libraries `implErrorBody` and
-`implStatusForSdkCode`.
+their messages), `retryRules`, `nonRetryableCodes` (the API codes of `R-NONRETRY`; an SDK-side
+code that is never retryable, such as `DOWNLOAD_FAILED`, has its own rule), `retryAfterClampMs`,
+`normalizations` (what an SDK test may normalize before comparing), `errorCaseMethod` (the SDK
+method a generated error case calls, per route), `cancellationSdks`, and for integration libraries
+`implErrorBody` and `implStatusForSdkCode`.
 
 ### `cases`
 
