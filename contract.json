@@ -5733,6 +5733,104 @@
     {
       "call": {
         "args": [
+          {
+            "data": {
+              "invoiceNumber": "INV-001"
+            },
+            "project": "billing",
+            "template": "invoice"
+          }
+        ],
+        "method": "render.pdf"
+      },
+      "expect": {
+        "events": [
+          {
+            "attempt": 1,
+            "type": "request"
+          }
+        ],
+        "requests": [
+          {
+            "auth": "bearer",
+            "idempotencyKey": "stable",
+            "json": {
+              "data": {
+                "invoiceNumber": "INV-001"
+              },
+              "project": "billing",
+              "template": "invoice"
+            },
+            "method": "POST",
+            "path": "/v1/render"
+          },
+          {
+            "auth": "none",
+            "idempotencyKey": "absent",
+            "method": "GET",
+            "path": "/storage/doc_abc123.pdf?X-Amz-Expires=900&X-Amz-Signature=5f2b9c"
+          }
+        ],
+        "result": {
+          "error": {
+            "code": "DOWNLOAD_FAILED",
+            "isAuthError": false,
+            "isNetworkError": false,
+            "isRateLimitError": false,
+            "isValidationError": false,
+            "message": "Failed to download PDF: timeout",
+            "requestId": null,
+            "retryable": false,
+            "status": null
+          },
+          "ok": false
+        }
+      },
+      "id": "download.timeout",
+      "kind": "sdk",
+      "options": {
+        "maxRetries": 2,
+        "retryDelayMs": 20,
+        "timeoutMs": 150
+      },
+      "responses": [
+        {
+          "headers": {
+            "x-request-id": "req_render_ok"
+          },
+          "json": {
+            "apiKeyId": "3b9e1f2a-4c5d-4e6f-8a7b-9c0d1e2f3a4b",
+            "createdAt": "2026-09-29T09:45:22.000Z",
+            "diagnostics": [],
+            "documentId": "doc_abc123",
+            "environment": "sandbox",
+            "expiresAt": "2026-09-29T10:00:22.000Z",
+            "format": "A4",
+            "locale": "fr-FR",
+            "metadata": {
+              "customerId": "cust_123"
+            },
+            "organizationId": "org_xyz",
+            "orientation": "portrait",
+            "pageCount": 2,
+            "presignedPdfUrl": "{{mock}}/storage/doc_abc123.pdf?X-Amz-Expires=900&X-Amz-Signature=5f2b9c",
+            "projectId": "8f1c2d4e-1b2a-4c3d-9e8f-0a1b2c3d4e5f",
+            "projectSlug": "billing",
+            "sizeBytes": 38421,
+            "templateId": "5d2a7c9e-3f4b-4a1c-8d2e-6f7a8b9c0d1e",
+            "templateSlug": "invoice"
+          },
+          "status": 200
+        },
+        {
+          "fault": "hang"
+        }
+      ],
+      "title": "A download that outlasts timeoutMs is DOWNLOAD_FAILED without a status, not retried"
+    },
+    {
+      "call": {
+        "args": [
           "doc_abc123"
         ],
         "cancelAfterMs": 100,
@@ -6079,6 +6177,62 @@
         }
       ],
       "title": "A non-JSON error keeps the x-request-id header as its requestId"
+    },
+    {
+      "call": {
+        "args": [
+          "doc_abc123"
+        ],
+        "method": "documents.get"
+      },
+      "expect": {
+        "events": [
+          {
+            "attempt": 1,
+            "type": "request"
+          }
+        ],
+        "requests": [
+          {
+            "auth": "bearer",
+            "idempotencyKey": "absent",
+            "method": "GET",
+            "path": "/v1/documents/doc_abc123"
+          }
+        ],
+        "result": {
+          "error": {
+            "code": "invalid_response",
+            "isAuthError": false,
+            "isNetworkError": false,
+            "isRateLimitError": false,
+            "isValidationError": false,
+            "message": "Invalid response: HTTP 200 body is not JSON",
+            "requestId": "req_invalid_response",
+            "retryable": false,
+            "status": 200
+          },
+          "ok": false
+        }
+      },
+      "id": "error.invalid-response",
+      "kind": "sdk",
+      "options": {
+        "maxRetries": 2,
+        "retryDelayMs": 20,
+        "timeoutMs": 1000
+      },
+      "responses": [
+        {
+          "headers": {
+            "content-type": "text/html",
+            "x-request-id": "req_invalid_response"
+          },
+          "status": 200,
+          "text": "<html><body><h1>Welcome</h1></body></html>"
+        }
+      ],
+      "title": "A 200 whose body is not JSON is invalid_response with status 200, not retried"
     },
     {
       "call": {
@@ -6988,6 +7142,43 @@
       "expect": {
         "contentType": "application/json",
         "json": {
+          "code": "invalid_response",
+          "message": "Invalid response: HTTP 200 body is not JSON",
+          "requestId": "req_impl_invalid",
+          "status": 502
+        },
+        "requests": [
+          {
+            "auth": "bearer",
+            "idempotencyKey": "absent",
+            "method": "GET",
+            "path": "/v1/documents/doc_abc123"
+          }
+        ],
+        "status": 502
+      },
+      "id": "impl.invalid-response",
+      "kind": "impl",
+      "request": {
+        "method": "GET",
+        "path": "/documents/doc_abc123"
+      },
+      "responses": [
+        {
+          "headers": {
+            "content-type": "text/html",
+            "x-request-id": "req_impl_invalid"
+          },
+          "status": 200,
+          "text": "<html><body><h1>Welcome</h1></body></html>"
+        }
+      ],
+      "title": "A 200 from the API whose body is not JSON answers 502 invalid_response, not retried"
+    },
+    {
+      "expect": {
+        "contentType": "application/json",
+        "json": {
           "code": "INTERNAL_ERROR",
           "message": "Unexpected server error.",
           "requestId": "req_impl_5xx_3",
@@ -7527,6 +7718,7 @@
       "requestId"
     ],
     "implStatusForSdkCode": {
+      "invalid_response": 502,
       "network_error": 503,
       "timeout": 504
     },
@@ -7604,6 +7796,18 @@
         "text": "DOWNLOAD_FAILED is never retryable, whatever the storage status."
       },
       {
+        "id": "R-DOWNLOAD-TIMEOUT",
+        "text": "The presigned-URL download is bounded by timeout: the whole download for render.pdf and downloadPdf, the wait for the first byte and each gap between chunks for render.pdfStream. Exceeding it raises DOWNLOAD_FAILED without a status, not retried."
+      },
+      {
+        "id": "R-INVALID-RESPONSE",
+        "text": "invalid_response (a 2xx answer whose body is not JSON where the method expects JSON) is never retried."
+      },
+      {
+        "id": "R-IO",
+        "text": "io_error is never retried."
+      },
+      {
         "id": "R-AFTER",
         "text": "A Retry-After header in integer seconds sets the delay before the next attempt, without jitter."
       },
@@ -7636,7 +7840,8 @@
       "DOWNLOAD_FAILED": {
         "message": "Failed to download PDF: HTTP {status}",
         "networkMessage": "Failed to download PDF: network error",
-        "status": "storage"
+        "status": "storage",
+        "timeoutMessage": "Failed to download PDF: timeout"
       },
       "PROJECT_REQUIRED_FOR_DOCUMENT": {
         "dynamicOnly": true,
@@ -7649,6 +7854,15 @@
       },
       "invalid_options": {
         "message": "apiKey is required",
+        "status": "none"
+      },
+      "invalid_response": {
+        "message": "Invalid response: HTTP {status} body is not JSON",
+        "status": "api"
+      },
+      "io_error": {
+        "fileHelperOnly": true,
+        "message": "Failed to write PDF: {reason}",
         "status": "none"
       },
       "network_error": {

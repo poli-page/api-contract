@@ -105,8 +105,12 @@ Strings in a case may contain placeholders, replaced before the case runs:
 Any other placeholder is an error. A case without `apiKey` uses any non-empty test key; requests
 with `auth: "bearer"` carry `Authorization: Bearer <that key>`.
 
-`policy.sdkErrors` messages use `{timeoutMs}` and `{status}`; an entry with `networkMessage` uses
-it instead when the failure has no HTTP status.
+`policy.sdkErrors` messages use `{timeoutMs}`, `{status}` and `{reason}` (the OS or runtime error's
+own text); an entry with `networkMessage` uses it instead when the failure has no HTTP status, and
+one with `timeoutMessage` when the client's `timeoutMs` elapsed. An entry's `status` says where the
+error's status comes from: `none`, `storage` (the presigned-URL download) or `api` (the API's
+answer). An entry with `dynamicOnly` is raised only by dynamically typed SDKs, one with
+`fileHelperOnly` only by render-to-file helpers; no case reaches the latter.
 
 ## License
 
