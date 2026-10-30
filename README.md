@@ -7,7 +7,18 @@ mock server.
 
 This repository is published from the `develop` branch of the Poli Page monorepo, by CI, each
 time an API change changes the contract. Do not edit it here: changes are overwritten by the
-next publish. Each publish is a commit `contract from develop <sha>` tagged `v1.N.0`.
+next publish. Each publish is a commit `contract from develop <sha>`.
+
+## Versions
+
+Tags follow the Poli Page API version, the version prod runs:
+
+- `vX.Y.0`: the contract of prod release `vX.Y.0`, for every minor release (an unchanged contract
+  is tagged again). A release that changes the contract is always a minor; patch releases keep
+  the contract and get no tag.
+- `vX.Y.0-dev.N`: an unreleased contract from `develop`, which the next minor `vX.Y` will ship.
+
+An SDK or integration `X.Y.z` passes contract `X.Y` and is released once prod runs API `X.Y`.
 
 ## Usage
 
@@ -15,7 +26,7 @@ The repository is a GitHub Action that copies `contract.json` to `$RUNNER_TEMP` 
 path. Pin it by full commit SHA:
 
 ```yaml
-- uses: poli-page/api-contract@<sha> # v1.N.0
+- uses: poli-page/api-contract@<sha> # vX.Y.Z
   id: contract
 - run: <your test command>
   env:
@@ -24,8 +35,8 @@ path. Pin it by full commit SHA:
 
 Your tests read the file at `$POLI_CONTRACT`.
 
-To get a pull request for each new version, enable Dependabot for GitHub Actions in
-`.github/dependabot.yml`:
+To get a pull request for each new release, enable Dependabot for GitHub Actions in
+`.github/dependabot.yml` (while you pin a `vX.Y.Z` tag, it skips the `-dev.N` prereleases):
 
 ```yaml
 version: 2
