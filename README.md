@@ -58,7 +58,8 @@ One JSON object, keys sorted, with five fields.
 
 ### `formatVersion`
 
-`1`, the version of this layout.
+`2`, the version of this layout. Version 2 added `expect.minCallMs`; a harness that does not know
+a version fails instead of skipping what it added.
 
 ### `routes`
 
@@ -93,11 +94,18 @@ Each case has a unique `id`, a `title` and a `kind`.
 - `sdk`: build a client with `options` (`maxRetries`, `retryDelayMs`, `timeoutMs`) and `apiKey`
   (absent means a fixed test key) pointed at a local server; the server answers `responses` in
   order (a `status` with `headers` and one of `json`, `text` or `base64`, or a `fault`: `drop` or
-  `hang`) and records the requests. Call `call.method` with `call.args`, then compare `expect.requests` (method,
-  path, auth, idempotency key, body; timing as lower bounds measured on the server, in integer milliseconds; after a hung
-  attempt the bound counts only half of `timeoutMs`, since the client's timer starts before its
-  request reaches the server), `expect.events` (`request` and
+  `hang`) and records the requests. Call `call.method` with `call.args`, then compare
+  `expect.requests` (method, path, auth, idempotency key, body), `expect.events` (`request` and
   `retry` hooks) and `expect.result` (the value, or the normalized error with its predicates).
+  Timing bounds are lower bounds in integer milliseconds (round the measured duration; the case
+  fails below the bound):
+    - `minGapMsBefore` on a request: the time since the server received the previous request, on
+      the server's clock. Set only after an answered or dropped request, never after a hung one.
+    - `expect.minCallMs`: the duration of the whole call on the test's monotonic clock, started
+      immediately before calling `call.method` (server listening, client built) and stopped when the
+      call returns or throws (for `render.pdfStream`, once the stream is read to its end or fails).
+      Set on the cases a timeout ends: the `timeoutMs` of each hung attempt or download plus each
+      retry delay's floor, which a correct client spends on its own timers after the call starts.
   A case with `requires: "cancellation"` runs only in the SDKs of `policy.cancellationSdks`.
   A case with `stopAfterRetryEvents: N` is stopped at its Nth `retry` event (cancel or abandon the
   call): compare the events and requests up to that point, not the result.

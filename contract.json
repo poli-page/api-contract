@@ -5276,6 +5276,7 @@
             "type": "request"
           }
         ],
+        "minCallMs": 480,
         "requests": [
           {
             "auth": "bearer",
@@ -5287,14 +5288,12 @@
             "auth": "bearer",
             "idempotencyKey": "absent",
             "method": "GET",
-            "minGapMsBefore": 85,
             "path": "/v1/documents/doc_abc123"
           },
           {
             "auth": "bearer",
             "idempotencyKey": "absent",
             "method": "GET",
-            "minGapMsBefore": 95,
             "path": "/v1/documents/doc_abc123"
           }
         ],
@@ -5750,6 +5749,7 @@
             "type": "request"
           }
         ],
+        "minCallMs": 150,
         "requests": [
           {
             "auth": "bearer",
@@ -7696,7 +7696,7 @@
       "status": 504
     }
   ],
-  "formatVersion": 1,
+  "formatVersion": 2,
   "policy": {
     "cancellationSdks": [
       "node",
@@ -7826,6 +7826,10 @@
       {
         "id": "R-BACKOFF",
         "text": "With no Retry-After, the delay before retry n (1-based) is retryDelay x 2^(n-1) x j, with j uniform in [0.5, 1.5)."
+      },
+      {
+        "id": "R-WAIT-FULL",
+        "text": "No wait ends early: a sleep lasts at least its delay, and a timeout (an attempt or the download) fires no sooner than timeoutMs after it started. A timer that wakes early waits again for the rest."
       },
       {
         "id": "R-MAX",
